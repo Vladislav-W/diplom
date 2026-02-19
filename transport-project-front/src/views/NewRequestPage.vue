@@ -84,37 +84,26 @@
                         Пункт погрузки:
                       </h4>
                       
+                      <!-- Организация с кнопкой справа - ТЕПЕРЬ ТЕКСТОВОЕ ПОЛЕ -->
                       <v-row no-gutters class="mb-3">
                         <v-col cols="12">
                           <v-row no-gutters>
                             <v-col cols="9">
-                              <v-autocomplete
-                                v-model="routeData.organization_from_id"
-                                :items="organizations"
-                                item-text="name"
-                                item-value="organization_id"
+                              <v-text-field
+                                v-model="organizationFromName"
                                 label="Организация *"
                                 placeholder="Введите организацию"
                                 outlined
                                 dense
                                 required
                                 hide-details
-                                :loading="loading.organizations"
-                                :error-messages="errors.organization_from_id"
-                                @change="validateField('organization_from_id')"
+                                :error-messages="errors.organization_from_name"
+                                @input="validateField('organization_from_name')"
                               >
                                 <template v-slot:label>
                                   Организация <span style="color: red;">*</span>
                                 </template>
-                                <template v-slot:no-data>
-                                  <v-list-item>
-                                    <v-list-item-content>
-                                      <v-list-item-title>Нет данных</v-list-item-title>
-                                      <v-list-item-subtitle>Проверьте подключение к API</v-list-item-subtitle>
-                                    </v-list-item-content>
-                                  </v-list-item>
-                                </template>
-                              </v-autocomplete>
+                              </v-text-field>
                             </v-col>
                             <v-col cols="3" class="pl-2">
                               <v-btn
@@ -132,6 +121,7 @@
                         </v-col>
                       </v-row>
                       
+                      <!-- Город и Адрес слева, Примечание справа -->
                       <v-row>
                         <v-col cols="7">
                           <v-row>
@@ -200,29 +190,26 @@
                         Пункт разгрузки:
                       </h4>
                       
+                      <!-- Организация с кнопкой справа - ТЕПЕРЬ ТЕКСТОВОЕ ПОЛЕ -->
                       <v-row no-gutters class="mb-3">
                         <v-col cols="12">
                           <v-row no-gutters>
                             <v-col cols="9">
-                              <v-autocomplete
-                                v-model="routeData.organization_to_id"
-                                :items="organizations"
-                                item-text="name"
-                                item-value="organization_id"
+                              <v-text-field
+                                v-model="organizationToName"
                                 label="Организация *"
                                 placeholder="Введите организацию"
                                 outlined
                                 dense
                                 required
                                 hide-details
-                                :loading="loading.organizations"
-                                :error-messages="errors.organization_to_id"
-                                @change="validateField('organization_to_id')"
+                                :error-messages="errors.organization_to_name"
+                                @input="validateField('organization_to_name')"
                               >
                                 <template v-slot:label>
                                   Организация <span style="color: red;">*</span>
                                 </template>
-                              </v-autocomplete>
+                              </v-text-field>
                             </v-col>
                             <v-col cols="3" class="pl-2">
                               <v-btn
@@ -240,6 +227,7 @@
                         </v-col>
                       </v-row>
                       
+                      <!-- Город и Адрес слева, Примечание справа -->
                       <v-row>
                         <v-col cols="7">
                           <v-row>
@@ -310,6 +298,7 @@
                         Ответственный за заявку:
                       </h4>
                       
+                      <!-- Заголовки в один ряд (без отступов) -->
                       <v-row class="ma-0">
                         <v-col cols="12" md="2" class="pa-0">
                           <span class="text-subtitle-2 font-weight-medium">Подразделение</span>
@@ -325,6 +314,7 @@
                         </v-col>
                       </v-row>
                       
+                      <!-- Поля ввода в один ряд (underlined) -->
                       <v-row class="mt-1 ma-0">
                         <v-col cols="12" md="2" class="pa-0 pr-2">
                           <v-select
@@ -429,7 +419,7 @@
       </v-tabs-items>
     </v-container>
 
-    <!-- Диалог выбора организации -->
+    <!-- ДИАЛОГОВОЕ ОКНО ДЛЯ ВЫБОРА ОРГАНИЗАЦИИ (без изменений) -->
     <v-dialog v-model="organizationsDialog.show" max-width="600px">
       <v-card>
         <v-card-title class="primary white--text">
@@ -552,12 +542,15 @@ export default {
       organizations: [],
       responsiblePeople: [],
       
+      // Новые поля для названий организаций
+      organizationFromName: '',
+      organizationToName: '',
+      
       routeData: {
-        organization_from_id: null,
+        // organization_from_id и organization_to_id больше не используются
         departure_city_id: null,
         address_from: '',
         notes_from: '',
-        organization_to_id: null,
         arrival_city_id: null,
         address_to: '',
         notes_to: ''
@@ -585,10 +578,10 @@ export default {
       attorneyForDriver: false,
       
       errors: {
-        organization_from_id: '',
+        organization_from_name: '',
+        organization_to_name: '',
         departure_city_id: '',
         address_from: '',
-        organization_to_id: '',
         arrival_city_id: '',
         address_to: ''
       },
@@ -707,6 +700,7 @@ export default {
         } else {
           this.organizations = []
         }
+        console.log('✅ Организации загружены для диалога:', this.organizations)
       } catch (error) {
         console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
@@ -736,17 +730,17 @@ export default {
     
     validateField(field) {
       switch(field) {
-        case 'organization_from_id':
-          this.errors.organization_from_id = this.routeData.organization_from_id ? '' : 'Поле обязательно'
+        case 'organization_from_name':
+          this.errors.organization_from_name = this.organizationFromName ? '' : 'Поле обязательно'
+          break
+        case 'organization_to_name':
+          this.errors.organization_to_name = this.organizationToName ? '' : 'Поле обязательно'
           break
         case 'departure_city_id':
           this.errors.departure_city_id = this.routeData.departure_city_id ? '' : 'Поле обязательно'
           break
         case 'address_from':
           this.errors.address_from = this.routeData.address_from ? '' : 'Поле обязательно'
-          break
-        case 'organization_to_id':
-          this.errors.organization_to_id = this.routeData.organization_to_id ? '' : 'Поле обязательно'
           break
         case 'arrival_city_id':
           this.errors.arrival_city_id = this.routeData.arrival_city_id ? '' : 'Поле обязательно'
@@ -759,10 +753,10 @@ export default {
 
     validateForm() {
       const requiredFields = [
-        'organization_from_id',
+        'organization_from_name',
+        'organization_to_name',
         'departure_city_id',
         'address_from',
-        'organization_to_id',
         'arrival_city_id',
         'address_to'
       ]
@@ -807,11 +801,11 @@ export default {
 
     selectOrganization(organization) {
       if (this.organizationsDialog.type === 'from') {
-        this.routeData.organization_from_id = organization.organization_id
-        this.validateField('organization_from_id')
+        this.organizationFromName = organization.name
+        this.validateField('organization_from_name')
       } else {
-        this.routeData.organization_to_id = organization.organization_id
-        this.validateField('organization_to_id')
+        this.organizationToName = organization.name
+        this.validateField('organization_to_name')
       }
       this.organizationsDialog.show = false
     },
@@ -844,12 +838,12 @@ export default {
           name: p.full_name,
           department: p.department 
         })),
+        organizationFromName: this.organizationFromName,
+        organizationToName: this.organizationToName,
         routeData: {
-          organization_from_id: this.routeData.organization_from_id,
           departure_city_id: this.routeData.departure_city_id,
           address_from: this.routeData.address_from,
           notes_from: this.routeData.notes_from,
-          organization_to_id: this.routeData.organization_to_id,
           arrival_city_id: this.routeData.arrival_city_id,
           address_to: this.routeData.address_to,
           notes_to: this.routeData.notes_to
@@ -881,11 +875,11 @@ export default {
 
     fillTestData() {
       if (this.cities.length >= 2 && this.organizations.length >= 2) {
-        this.routeData.organization_from_id = this.organizations[0]?.organization_id
+        this.organizationFromName = this.organizations[0]?.name || 'Тестовая организация 1'
         this.routeData.departure_city_id = this.cities[0]?.city_id
         this.routeData.address_from = 'Тестовый адрес 1'
         this.routeData.notes_from = 'Тестовое примечание 1'
-        this.routeData.organization_to_id = this.organizations[1]?.organization_id
+        this.organizationToName = this.organizations[1]?.name || 'Тестовая организация 2'
         this.routeData.arrival_city_id = this.cities[1]?.city_id
         this.routeData.address_to = 'Тестовый адрес 2'
         this.routeData.notes_to = 'Тестовое примечание 2'
@@ -910,7 +904,6 @@ export default {
       console.log('🟢 Начинаем создание тестовых данных...')
       
       try {
-        // Создаем тестовый город
         const cityData = {
           name: 'Тестовый город ' + new Date().toLocaleTimeString()
         }
@@ -918,7 +911,6 @@ export default {
         const cityResponse = await cityService.create(cityData)
         console.log('✅ Город создан:', cityResponse)
 
-        // Создаем тестовую организацию
         const orgData = {
           name: 'Тестовая организация ' + new Date().toLocaleTimeString()
         }
@@ -926,7 +918,6 @@ export default {
         const orgResponse = await organizationService.create(orgData)
         console.log('✅ Организация создана:', orgResponse)
 
-        // Создаем тестовый груз
         const cargoData = {
           cargo_name: 'Тестовый груз ' + new Date().toLocaleTimeString(),
           date_of_taking_cargo: new Date().toISOString().split('T')[0],
@@ -941,7 +932,6 @@ export default {
         const cargoResponse = await cargoService.create(cargoData)
         console.log('✅ Груз создан:', cargoResponse)
 
-        // После создания, перезагружаем списки
         await this.loadCities()
         await this.loadOrganizations()
         await this.loadResponsiblePeople()
@@ -971,26 +961,24 @@ export default {
       console.log('🟢 Начинаем создание тестовой заявки...')
       
       try {
-        // Берем первые существующие записи из справочников
         const firstCity = this.cities[0]
-        const firstOrg = this.organizations[0]
         const firstPerson = this.responsiblePeople[0]
         
-        if (!firstCity || !firstOrg || !firstPerson) {
+        if (!firstCity || !firstPerson) {
           throw new Error('Сначала создайте тестовые данные в БД (фиолетовая кнопка)')
         }
         
         const requestData = {
           request_number: `TEST-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
           status: 'На согласовании',
-          organization_from_id: firstOrg.organization_id,
+          organization_from_name: this.organizationFromName || 'Тестовая организация',
           departure_city_id: firstCity.city_id,
-          address_from: 'Тестовый адрес погрузки',
-          notes_from: 'Тестовое примечание погрузки',
-          organization_to_id: firstOrg.organization_id,
+          address_from: this.routeData.address_from || 'Тестовый адрес погрузки',
+          notes_from: this.routeData.notes_from || 'Тестовое примечание погрузки',
+          organization_to_name: this.organizationToName || 'Тестовая организация',
           arrival_city_id: firstCity.city_id,
-          address_to: 'Тестовый адрес разгрузки',
-          notes_to: 'Тестовое примечание разгрузки',
+          address_to: this.routeData.address_to || 'Тестовый адрес разгрузки',
+          notes_to: this.routeData.notes_to || 'Тестовое примечание разгрузки',
           departure_datetime: new Date().toISOString(),
           arrival_datetime: new Date().toISOString(),
           responsible_person_id: firstPerson.responsible_person_id,
@@ -1044,11 +1032,11 @@ export default {
         const requestData = {
           request_number: `З-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
           status: 'Черновик',
-          organization_from_id: parseInt(this.routeData.organization_from_id),
+          organization_from_name: this.organizationFromName,
           departure_city_id: departureCityId,
           address_from: this.routeData.address_from,
           notes_from: this.routeData.notes_from || '',
-          organization_to_id: parseInt(this.routeData.organization_to_id),
+          organization_to_name: this.organizationToName,
           arrival_city_id: arrivalCityId,
           address_to: this.routeData.address_to,
           notes_to: this.routeData.notes_to || '',
@@ -1110,11 +1098,11 @@ export default {
         const requestData = {
           request_number: `З-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
           status: 'На согласовании',
-          organization_from_id: parseInt(this.routeData.organization_from_id),
+          organization_from_name: this.organizationFromName,
           departure_city_id: departureCityId,
           address_from: this.routeData.address_from,
           notes_from: this.routeData.notes_from || '',
-          organization_to_id: parseInt(this.routeData.organization_to_id),
+          organization_to_name: this.organizationToName,
           arrival_city_id: arrivalCityId,
           address_to: this.routeData.address_to,
           notes_to: this.routeData.notes_to || '',
