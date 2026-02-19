@@ -3,7 +3,7 @@
     <!-- Заголовок и кнопки действий -->
     <v-container fluid class="px-4 pt-0 pb-0">
       <v-row class="mb-4">
-        <v-col cols="12" sm="6" class="d-flex align-center">
+        <v-col sm="6" class="d-flex align-center">
           <div class="text-h5 font-weight-bold" style="color: #1976d2">
             Заявка от {{ currentDate }} - оформление
           </div>
@@ -650,39 +650,25 @@ export default {
     },
     
     async loadCities() {
-      console.log('🟢 ===== НАЧАЛО ЗАГРУЗКИ ГОРОДОВ =====')
       this.loading.cities = true
       try {
-        console.log('🟡 Вызываем cityService.getAll()')
         const response = await cityService.getAll()
-        console.log('🟢 Ответ от API:', response)
+        console.log('📦 cities response:', response)
         
-        let citiesData = []
+        // Проверяем структуру ответа
         if (response && response.data) {
-          citiesData = response.data
-          console.log('✅ Взяли response.data:', citiesData)
+          // Если ответ в формате { data: [...] }
+          this.cities = response.data
         } else if (Array.isArray(response)) {
-          citiesData = response
-          console.log('✅ Взяли массив:', citiesData)
+          // Если ответ просто массив
+          this.cities = response
         } else {
-          console.log('⚠️ Неизвестный формат:', response)
-          citiesData = []
+          this.cities = []
         }
         
-        this.cities = citiesData.map(city => {
-          console.log('🏙️ Обрабатываем город:', city)
-          return {
-            city_id: city.city_id || city.id,
-            name: city.name || ''
-          }
-        })
-        
-        console.log('✅ Итоговый массив cities:', this.cities)
-        console.log('📊 Количество городов:', this.cities.length)
-        console.log('🟢 ===== ЗАГРУЗКА ГОРОДОВ ЗАВЕРШЕНА =====')
-        
+        console.log('✅ Города загружены:', this.cities)
       } catch (error) {
-        console.error('🔴 ОШИБКА ЗАГРУЗКИ ГОРОДОВ:', error)
+        console.error('❌ Ошибка загрузки городов:', error)
         this.cities = []
       } finally {
         this.loading.cities = false
@@ -693,6 +679,8 @@ export default {
       this.loading.organizations = true
       try {
         const response = await organizationService.getAll()
+        console.log('📦 organizations response:', response)
+        
         if (response && response.data) {
           this.organizations = response.data
         } else if (Array.isArray(response)) {
@@ -700,9 +688,10 @@ export default {
         } else {
           this.organizations = []
         }
-        console.log('✅ Организации загружены для диалога:', this.organizations)
+        
+        console.log('✅ Организации загружены:', this.organizations)
       } catch (error) {
-        console.error('Ошибка загрузки организаций:', error)
+        console.error('❌ Ошибка загрузки организаций:', error)
         this.organizations = []
       } finally {
         this.loading.organizations = false
@@ -713,6 +702,8 @@ export default {
       this.loading.responsiblePeople = true
       try {
         const response = await responsiblePersonService.getAll()
+        console.log('📦 responsiblePeople response:', response)
+        
         if (response && response.data) {
           this.responsiblePeople = response.data
         } else if (Array.isArray(response)) {
@@ -720,8 +711,10 @@ export default {
         } else {
           this.responsiblePeople = []
         }
+        
+        console.log('✅ Ответственные лица загружены:', this.responsiblePeople)
       } catch (error) {
-        console.error('Ошибка загрузки ответственных лиц:', error)
+        console.error('❌ Ошибка загрузки ответственных лиц:', error)
         this.responsiblePeople = []
       } finally {
         this.loading.responsiblePeople = false

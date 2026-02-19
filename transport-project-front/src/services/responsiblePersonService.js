@@ -1,27 +1,25 @@
 import api from './api';
 
 export const responsiblePersonService = {
-    async getAll() {
-        try {
-            const response = await api.get('/responsible-people');
-            console.log('responsiblePersonService.getAll response:', response);
-            
-            if (typeof response.data === 'string') {
-                try {
-                    const cleanData = response.data.replace(/^\uFEFF/, '').trim();
-                    console.log('Clean data string:', cleanData.substring(0, 100));
-                    const parsed = JSON.parse(cleanData);
-                    return parsed;
-                } catch (e) {
-                    console.error('Ошибка парсинга JSON:', e);
-                    return { data: [] };
-                }
+  async getAll() {
+    try {
+      const response = await api.get('/responsible-people');
+      console.log('responsiblePersonService.getAll response:', response);
+      
+      if (typeof response.data === 'string') {
+            try {
+            const cleanData = response.data.replace(/^\uFEFF/, '');
+            const parsed = JSON.parse(cleanData);
+            return parsed;
+            } catch (e) {
+            console.error('Ошибка парсинга JSON:', e);
+            return { data: [] };
             }
-            
-            return response.data;
+        }
+        return response.data;
         } catch (error) {
-            console.error('Ошибка при получении ответственных лиц:', error);
-            throw error;
+                console.error('Ошибка при получении ответственных лиц:', error);
+                throw error;
         }
     },
 

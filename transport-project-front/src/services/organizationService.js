@@ -8,8 +8,7 @@ export const organizationService = {
       
       if (typeof response.data === 'string') {
         try {
-          const cleanData = response.data.replace(/^\uFEFF/, '').trim();
-          console.log('Clean data string:', cleanData.substring(0, 100));
+          const cleanData = response.data.replace(/^\uFEFF/, '');
           const parsed = JSON.parse(cleanData);
           return parsed;
         } catch (e) {

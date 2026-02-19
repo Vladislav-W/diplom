@@ -1,10 +1,11 @@
 import Vue from 'vue'
+
 import VueRouter from 'vue-router'
-import NewRequestPage from '@/views/NewRequestPage.vue'
-import RequestsPage from '@/views/RequestsPage.vue'
-import AllRequestsPage from '@/views/AllRequestsPage.vue'
-import EditRequestPage from '@/views/EditRequestPage.vue'
-import RouteFormPage from '@/views/RouteFormPage.vue'
+
+import NewRequestPage from '@/views/NewRequestPage.vue'   // страница создания новой заявки
+import RequestsPage from '@/views/RequestsPage.vue'       // заявки на создание маршрута
+import AllRequestsPage from '@/views/AllRequestsPage.vue' // все заявки что были и не были реализованы
+import RouteFormPage from '@/views/RouteFormPage.vue'     // формирование маршрута из заявок
 
 Vue.use(VueRouter)
 
@@ -27,11 +28,6 @@ const routes = [
     path: '/all-requests',
     name: 'AllRequests',
     component: AllRequestsPage
-  },
-  {
-    path: '/requests/request/:id',
-    name: 'EditRequest',
-    component: EditRequestPage
   },
   {
     path: '/route-form',
