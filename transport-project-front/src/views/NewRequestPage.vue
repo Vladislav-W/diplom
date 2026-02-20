@@ -3,34 +3,19 @@
     <!-- Заголовок и кнопки действий -->
     <v-container fluid class="px-4 pt-0 pb-0">
       <v-row class="mb-4">
-        <v-col sm="6" class="d-flex align-center">
+        <v-col cols="6" class="d-flex align-center">
+          <!-- заголовок -->
           <div class="text-h5 font-weight-bold" style="color: #1976d2">
             Заявка от {{ currentDate }} - оформление
           </div>
         </v-col>
-
-        <v-col cols="12" sm="6" class="text-sm-right">
-          <v-btn
-            depressed
-            large
-            class="mr-2 mb-2 mb-sm-0"
-            color="grey lighten-1"
-            dark
-            @click="sendForApproval"
-            :loading="sending"
-          >
+        <!-- кнопки действий-->
+        <v-col cols="6" class="text-right">
+          <v-btn depressed large class="mr-2" color="grey lighten-1" dark @click="sendForApproval" :loading="sending">
             <v-icon left>mdi-send</v-icon>
             ОТПРАВИТЬ НА СОГЛАСОВАНИЕ
           </v-btn>
-
-          <v-btn
-            depressed
-            large
-            color="grey lighten-1"
-            dark
-            @click="saveRequest"
-            :loading="saving"
-          >
+          <v-btn depressed large color="grey lighten-1" dark @click="saveRequest" :loading="saving">
             <v-icon left>mdi-content-save</v-icon>
             СОХРАНИТЬ
           </v-btn>
@@ -43,17 +28,11 @@
       <v-container fluid class="py-0">
         <v-row no-gutters>
           <v-col cols="12">
-            <v-tabs
-                v-model="activeTab"
-                background-color="transparent"
-                slider-color="white"
-                class="tabs-container"
-            >
+            <v-tabs v-model="activeTab" background-color="transparent" slider-color="white" class="tabs-container">
               <v-tab class="text-uppercase mr-6 tab-item">МАРШРУТ</v-tab>
               <v-tab class="text-uppercase mr-6 tab-item">ДАННЫЕ О ГРУЗЕ</v-tab>
-              <v-tab class="text-uppercase tab-item">
+              <v-tab class="text-uppercase tab-item">ФАЙЛЫ
                 <v-icon left small>mdi-paperclip</v-icon>
-                ФАЙЛЫ
               </v-tab>
             </v-tabs>
           </v-col>
@@ -64,402 +43,81 @@
     <!-- Контент вкладок -->
     <v-container fluid class="tabs-content" :style="contentStyle">
       <v-tabs-items v-model="activeTab">
-        <!-- ВКЛАДКА 1: МАРШРУТ -->
+        <!-- ВКЛАДКА 1 - МАРШРУТ -->
         <v-tab-item>
-          <v-card flat class="pa-4">
-            <v-card-text>
-              <v-row>
-                <v-col cols="12">
-                  <div class="mb-6" style="display: inline-block;">
-                    <h3 class="text-h5 font-weight-bold" style="color: #1976d2">
-                      ПОЛУЧЕНИЕ МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ ПО ДОКУМЕНТУ
-                    </h3>
-                    <v-divider class="mt-2" style="border-color: #1976d2; border-width: 2px 0 0 0; width: 100%;"></v-divider>
-                  </div>
-          
-                  <v-row>
-                    <!-- Пункт погрузки -->
-                    <v-col cols="12" md="6">
-                      <h4 class="text-h6 font-weight-bold mb-4" style="color: #1976d2">
-                        Пункт погрузки:
-                      </h4>
-                      
-                      <!-- Организация с кнопкой справа - ТЕПЕРЬ ТЕКСТОВОЕ ПОЛЕ -->
-                      <v-row no-gutters class="mb-3">
-                        <v-col cols="12">
-                          <v-row no-gutters>
-                            <v-col cols="9">
-                              <v-text-field
-                                v-model="organizationFromName"
-                                label="Организация *"
-                                placeholder="Введите организацию"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :error-messages="errors.organization_from_name"
-                                @input="validateField('organization_from_name')"
-                              >
-                                <template v-slot:label>
-                                  Организация <span style="color: red;">*</span>
-                                </template>
-                              </v-text-field>
-                            </v-col>
-                            <v-col cols="3" class="pl-2">
-                              <v-btn
-                                elevation="2"
-                                height="40"
-                                block
-                                color="primary"
-                                outlined
-                                @click="openOrganizationsDialog('from')"
-                              >
-                                <v-icon>mdi-folder-search</v-icon>
-                              </v-btn>
-                            </v-col>
-                          </v-row>
-                        </v-col>
-                      </v-row>
-                      
-                      <!-- Город и Адрес слева, Примечание справа -->
-                      <v-row>
-                        <v-col cols="7">
-                          <v-row>
-                            <v-col cols="12" class="pb-0">
-                              <v-autocomplete
-                                v-model="routeData.departure_city_id"
-                                :items="cities"
-                                item-text="name"
-                                item-value="city_id"
-                                label="Город погрузки *"
-                                placeholder="Введите город"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :loading="loading.cities"
-                                :error-messages="errors.departure_city_id"
-                                @change="validateField('departure_city_id')"
-                              >
-                                <template v-slot:label>
-                                  Город погрузки <span style="color: red;">*</span>
-                                </template>
-                              </v-autocomplete>
-                            </v-col>
-                          </v-row>
-                          <v-row class="mt-3">
-                            <v-col cols="12">
-                              <v-text-field
-                                v-model="routeData.address_from"
-                                label="Адрес откуда *"
-                                placeholder="Введите адрес"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :error-messages="errors.address_from"
-                                @input="validateField('address_from')"
-                              >
-                                <template v-slot:label>
-                                  Адрес откуда <span style="color: red;">*</span>
-                                </template>
-                              </v-text-field>
-                            </v-col>
-                          </v-row>
-                        </v-col>
-                        
-                        <v-col cols="5">
-                          <v-textarea
-                            v-model="routeData.notes_from"
-                            label="Примечание"
-                            placeholder="Введите примечание"
-                            outlined
-                            dense
-                            rows="3"
-                            hide-details
-                            style="height: 100%;"
-                            class="fill-height"
-                          ></v-textarea>
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                    
-                    <!-- Пункт разгрузки -->
-                    <v-col cols="12" md="6">
-                      <h4 class="text-h6 font-weight-bold mb-4" style="color: #1976d2">
-                        Пункт разгрузки:
-                      </h4>
-                      
-                      <!-- Организация с кнопкой справа - ТЕПЕРЬ ТЕКСТОВОЕ ПОЛЕ -->
-                      <v-row no-gutters class="mb-3">
-                        <v-col cols="12">
-                          <v-row no-gutters>
-                            <v-col cols="9">
-                              <v-text-field
-                                v-model="organizationToName"
-                                label="Организация *"
-                                placeholder="Введите организацию"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :error-messages="errors.organization_to_name"
-                                @input="validateField('organization_to_name')"
-                              >
-                                <template v-slot:label>
-                                  Организация <span style="color: red;">*</span>
-                                </template>
-                              </v-text-field>
-                            </v-col>
-                            <v-col cols="3" class="pl-2">
-                              <v-btn
-                                elevation="2"
-                                height="40"
-                                block
-                                color="primary"
-                                outlined
-                                @click="openOrganizationsDialog('to')"
-                              >
-                                <v-icon>mdi-folder-search</v-icon>
-                              </v-btn>
-                            </v-col>
-                          </v-row>
-                        </v-col>
-                      </v-row>
-                      
-                      <!-- Город и Адрес слева, Примечание справа -->
-                      <v-row>
-                        <v-col cols="7">
-                          <v-row>
-                            <v-col cols="12" class="pb-0">
-                              <v-autocomplete
-                                v-model="routeData.arrival_city_id"
-                                :items="cities"
-                                item-text="name"
-                                item-value="city_id"
-                                label="Город разгрузки *"
-                                placeholder="Введите город"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :loading="loading.cities"
-                                :error-messages="errors.arrival_city_id"
-                                @change="validateField('arrival_city_id')"
-                              >
-                                <template v-slot:label>
-                                  Город разгрузки <span style="color: red;">*</span>
-                                </template>
-                              </v-autocomplete>
-                            </v-col>
-                          </v-row>
-                          <v-row class="mt-3">
-                            <v-col cols="12">
-                              <v-text-field
-                                v-model="routeData.address_to"
-                                label="Адрес куда *"
-                                placeholder="Введите адрес"
-                                outlined
-                                dense
-                                required
-                                hide-details
-                                :error-messages="errors.address_to"
-                                @input="validateField('address_to')"
-                              >
-                                <template v-slot:label>
-                                  Адрес куда <span style="color: red;">*</span>
-                                </template>
-                              </v-text-field>
-                            </v-col>
-                          </v-row>
-                        </v-col>
-                        
-                        <v-col cols="5">
-                          <v-textarea
-                            v-model="routeData.notes_to"
-                            label="Примечание"
-                            placeholder="Введите примечание"
-                            outlined
-                            dense
-                            rows="3"
-                            hide-details
-                            style="height: 100%;"
-                            class="fill-height"
-                          ></v-textarea>
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                  </v-row>
-
-                  <!-- Ответственный за заявку -->
-                  <v-row class="mt-6">
-                    <v-col cols="12">
-                      <h4 class="text-h6 font-weight-bold mb-4" style="color: #1976d2">
-                        Ответственный за заявку:
-                      </h4>
-                      
-                      <!-- Заголовки в один ряд (без отступов) -->
-                      <v-row class="ma-0">
-                        <v-col cols="12" md="2" class="pa-0">
-                          <span class="text-subtitle-2 font-weight-medium">Подразделение</span>
-                        </v-col>
-                        <v-col cols="12" md="4" class="pa-0">
-                          <span class="text-subtitle-2 font-weight-medium">Фамилия Имя Отчество</span>
-                        </v-col>
-                        <v-col cols="12" md="4" class="pa-0">
-                          <span class="text-subtitle-2 font-weight-medium">Должность</span>
-                        </v-col>
-                        <v-col cols="12" md="2" class="pa-0">
-                          <span class="text-subtitle-2 font-weight-medium">Телефон - рабочий</span>
-                        </v-col>
-                      </v-row>
-                      
-                      <!-- Поля ввода в один ряд (underlined) -->
-                      <v-row class="mt-1 ma-0">
-                        <v-col cols="12" md="2" class="pa-0 pr-2">
-                          <v-select
-                            v-model="selectedDepartment"
-                            :items="uniqueDepartments"
-                            label="Подразделение"
-                            placeholder="Выберите подразделение"
-                            variant="underlined"
-                            density="compact"
-                            hide-details
-                            clearable
-                            @change="onDepartmentChange"
-                          ></v-select>
-                        </v-col>
-                        
-                        <v-col cols="12" md="4" class="pa-0 pr-2">
-                          <v-select
-                            v-model="selectedResponsiblePerson"
-                            :items="filteredResponsiblePeople"
-                            item-text="full_name"
-                            item-value="responsible_person_id"
-                            label="Фамилия Имя Отчество"
-                            placeholder="Выберите ответственное лицо"
-                            variant="underlined"
-                            density="compact"
-                            hide-details
-                            clearable
-                            :disabled="!selectedDepartment"
-                            @change="onResponsiblePersonChange"
-                          ></v-select>
-                        </v-col>
-                        
-                        <v-col cols="12" md="4" class="pa-0 pr-2">
-                          <v-text-field
-                            v-model="position"
-                            label="Должность"
-                            placeholder="Должность"
-                            variant="underlined"
-                            density="compact"
-                            hide-details
-                            readonly
-                          ></v-text-field>
-                        </v-col>
-                        
-                        <v-col cols="12" md="2" class="pa-0">
-                          <v-text-field
-                            v-model="workPhone"
-                            label="Телефон - рабочий"
-                            placeholder="+7 (___) ___-__-__"
-                            variant="underlined"
-                            density="compact"
-                            type="tel"
-                            hide-details
-                            readonly
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                  </v-row>
-
-                  <!-- Доверенность -->
-                  <v-row class="mt-6">
-                    <v-col cols="12">
-                      <h4 class="text-h6 font-weight-bold mb-2" style="color: #1976d2">
-                        Доверенность:
-                      </h4>
-                      
-                      <v-checkbox
-                        v-model="attorneyForDriver"
-                        label="Требуется доверенность водителю"
-                        color="primary"
-                        hide-details
-                        class="mt-0"
-                      ></v-checkbox>
-                    </v-col>
-                  </v-row>
-
-                  <RequiredFieldsNote />
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-
-        <!-- ВКЛАДКА 2: ДАННЫЕ О ГРУЗЕ -->
-        <v-tab-item>
-          <TabCargo 
-            ref="tabCargoRef"
-            :initial-data="cargoData"
-            @update:cargoData="updateCargoData"
+          <TabRoute
+            :cities="cities"
+            :responsible-people="responsiblePeople"
+            :loading-cities="loading.cities"
+            
+            :organization-from-name="organizationFromName"
+            :organization-to-name="organizationToName"
+            :departure-city-id="routeData.departure_city_id"
+            :address-from="routeData.address_from"
+            :notes-from="routeData.notes_from"
+            :arrival-city-id="routeData.arrival_city_id"
+            :address-to="routeData.address_to"
+            :notes-to="routeData.notes_to"
+            
+            :selected-department="selectedDepartment"
+            :selected-responsible-person="selectedResponsiblePerson"
+            :position="position"
+            :work-phone="workPhone"
+            :attorney-for-driver="attorneyForDriver"
+            
+            :errors="errors"
+            
+            @update:organization-from-name="organizationFromName = $event"
+            @update:organization-to-name="organizationToName = $event"
+            @update:departure-city-id="routeData.departure_city_id = $event"
+            @update:address-from="routeData.address_from = $event"
+            @update:notes-from="routeData.notes_from = $event"
+            @update:arrival-city-id="routeData.arrival_city_id = $event"
+            @update:address-to="routeData.address_to = $event"
+            @update:notes-to="routeData.notes_to = $event"
+            
+            @update:department="onDepartmentChange"
+            @update:person="onResponsiblePersonChange"
+            @update:attorney="attorneyForDriver = $event"
+            
+            @open-org-dialog="openOrganizationsDialog"
           />
         </v-tab-item>
 
-        <!-- ВКЛАДКА 3: ФАЙЛЫ -->
+        <!-- ВКЛАДКА 2 - ДАННЫЕ О ГРУЗЕ -->
         <v-tab-item>
-          <TabFiles 
-            ref="tabFilesRef"
-            :initial-files="files"
-            @update:files="updateFiles"
-          />
+          <TabCargo ref="tabCargoRef" :initial-data="cargoData" @update:cargoData="updateCargoData"/>
+        </v-tab-item>
+
+        <!-- ВКЛАДКА 3 - ФАЙЛЫ -->
+        <v-tab-item>
+          <TabFiles ref="tabFilesRef" :initial-files="files" @update:files="updateFiles"/>
         </v-tab-item>
       </v-tabs-items>
     </v-container>
 
-    <!-- ДИАЛОГОВОЕ ОКНО ДЛЯ ВЫБОРА ОРГАНИЗАЦИИ (без изменений) -->
+    <!-- Диалоговое окно для выбора организации -->
     <v-dialog v-model="organizationsDialog.show" max-width="600px">
       <v-card>
         <v-card-title class="primary white--text">
           <span class="text-h6">Выбор организации</span>
-          <v-spacer></v-spacer>
           <v-btn icon dark @click="organizationsDialog.show = false">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
 
         <v-card-text class="pt-4">
-          <v-text-field
-            v-model="organizationsDialog.search"
-            label="Поиск"
-            placeholder="Введите название организации"
-            prepend-inner-icon="mdi-magnify"
-            outlined
-            dense
-            hide-details
-            class="mb-3"
-          ></v-text-field>
+          <v-text-field v-model="organizationsDialog.search" label="Поиск" placeholder="Введите название организации"
+            prepend-inner-icon="mdi-magnify" outlined dense hide-details class="mb-3"></v-text-field>
 
-          <v-data-table
+          <v-data-table loading-text="Загрузка организаций..." no-data-text="Нет организаций" dense
             :headers="orgHeaders"
             :items="filteredOrganizations"
             :loading="loading.organizations"
-            loading-text="Загрузка организаций..."
-            no-data-text="Нет организаций"
-            dense
             :items-per-page="5"
-            @click:row="selectOrganization"
-          >
+            @click:row="selectOrganization">
             <template slot="item.select" slot-scope="{ item }">
-              <v-btn
-                small
-                color="primary"
-                @click="selectOrganization(item)"
-              >
-                Выбрать
-              </v-btn>
+              <v-btn small color="primary" @click="selectOrganization(item)">Выбрать</v-btn>
             </template>
           </v-data-table>
         </v-card-text>
@@ -470,29 +128,29 @@
     <v-container fluid class="pa-4" style="background: #f0f0f0; border-top: 2px solid #ff5722;">
       <v-row>
         <v-col cols="12">
-          <h4 style="color: #ff5722;">🔧 ОТЛАДОЧНЫЕ КНОПКИ (временные)</h4>
+          <h4 style="color: #ff5722;"> ОТЛАДОЧНЫЕ КНОПКИ </h4>
         </v-col>
-        <v-col cols="12" sm="2">
+        <v-col cols="2">
           <v-btn color="warning" @click="debugValues" block class="mb-2" small>
             Показать значения
           </v-btn>
         </v-col>
-        <v-col cols="12" sm="2">
+        <v-col cols="2">
           <v-btn color="info" @click="testCitySelection" block class="mb-2" small>
             Тест выбора города
           </v-btn>
         </v-col>
-        <v-col cols="12" sm="2">
+        <v-col cols="2">
           <v-btn color="success" @click="fillTestData" block class="mb-2" small>
             Заполнить тестовые данные
           </v-btn>
         </v-col>
-        <v-col cols="12" sm="3">
+        <v-col cols="3">
           <v-btn color="purple" dark @click="createTestData" block class="mb-2" small>
             Создать тестовые данные в БД
           </v-btn>
         </v-col>
-        <v-col cols="12" sm="3">
+        <v-col cols="3">
           <v-btn color="deep-purple" dark @click="createTestRequest" block class="mb-2" small>
             Создать тестовую заявку
           </v-btn>
@@ -508,46 +166,46 @@
 </template>
 
 <script>
+import TabRoute from '@/components/tabs/TabRoute.vue'
 import TabCargo from '@/components/tabs/TabCargo.vue'
 import TabFiles from '@/components/tabs/TabFiles.vue'
-import RequiredFieldsNote from '@/components/common/RequiredFieldsNote.vue'
 import { organizationService } from '@/services/organizationService'
 import { cityService } from '@/services/cityService'
 import { responsiblePersonService } from '@/services/responsiblePersonService'
 import { requestService } from '@/services/requestService'
-import { fileService } from '@/services/fileService'
 import { cargoService } from '@/services/cargoService'
+import { fileService } from '@/services/fileService'
 
 export default {
   name: 'NewRequestPage',
   components: {
+    TabRoute,
     TabCargo,
     TabFiles,
-    RequiredFieldsNote
   },
+  
   data() {
     return {
+      // основные флаги состояния
       activeTab: 0,
       saving: false,
       sending: false,
       currentDate: this.getCurrentDate(),
-      
+      // флаги загрузки данных
       loading: {
         cities: false,
         organizations: false,
         responsiblePeople: false
       },
-      
+      // данные из БД
       cities: [],
       organizations: [],
       responsiblePeople: [],
-      
-      // Новые поля для названий организаций
+      // данные вводимые пользователем
       organizationFromName: '',
       organizationToName: '',
-      
+      // данные маршрута (в TabRoute)
       routeData: {
-        // organization_from_id и organization_to_id больше не используются
         departure_city_id: null,
         address_from: '',
         notes_from: '',
@@ -555,7 +213,7 @@ export default {
         address_to: '',
         notes_to: ''
       },
-      
+      // данные груза (в TabCargo)
       cargoData: {
         receiptDate: '',
         deliveryDate: '',
@@ -568,15 +226,15 @@ export default {
         hazardClass: null,
         materialItems: []
       },
-      
+      // файлы
       files: [],
-      
+      // данные ответственного лица
       selectedDepartment: null,
       selectedResponsiblePerson: null,
       position: '',
       workPhone: '',
       attorneyForDriver: false,
-      
+      // ошибки валидации
       errors: {
         organization_from_name: '',
         organization_to_name: '',
@@ -585,51 +243,31 @@ export default {
         arrival_city_id: '',
         address_to: ''
       },
-      
+      // диалоговое окно для выбора организаций
       organizationsDialog: {
         show: false,
         type: 'from',
         search: ''
       },
-      
+      // заголовки таблицы организаций
       orgHeaders: [
         { text: 'Название', value: 'name', align: 'start' },
         { text: 'Действие', value: 'select', align: 'center', sortable: false }
       ],
-      
-      // Для отладки
+      // отладка
       debugInfo: null
     }
   },
+
   computed: {
     contentStyle() {
       return {
         height: 'calc(100vh - 220px)',
-        overflowY: 'auto',
+        overflowY: 'auto',              // вертикальная прокрутка
         padding: '0 24px'
       }
     },
-    
-    uniqueDepartments() {
-      if (!this.responsiblePeople || !Array.isArray(this.responsiblePeople) || this.responsiblePeople.length === 0) {
-        return []
-      }
-      const departments = this.responsiblePeople
-        .map(person => person.department)
-        .filter((value, index, self) => value && self.indexOf(value) === index)
-        .sort()
-      return departments
-    },
-    
-    filteredResponsiblePeople() {
-      if (!this.selectedDepartment || !Array.isArray(this.responsiblePeople)) {
-        return []
-      }
-      return this.responsiblePeople.filter(
-        person => person.department === this.selectedDepartment
-      )
-    },
-    
+    // фильтруем организации по поисковому запросу
     filteredOrganizations() {
       if (!this.organizationsDialog.search) {
         return this.organizations
@@ -640,6 +278,7 @@ export default {
       )
     }
   },
+
   methods: {
     getCurrentDate() {
       const date = new Date()
@@ -648,30 +287,27 @@ export default {
       const year = date.getFullYear()
       return `${day}.${month}.${year}`
     },
-    
+    // загрузка данных из API
     async loadCities() {
-      this.loading.cities = true
+      this.loading.cities = true      // включаем индикатор загрузки
       try {
         const response = await cityService.getAll()
-        console.log('📦 cities response:', response)
-        
-        // Проверяем структуру ответа
         if (response && response.data) {
-          // Если ответ в формате { data: [...] }
           this.cities = response.data
-        } else if (Array.isArray(response)) {
-          // Если ответ просто массив
+        }
+        else if (Array.isArray(response)) {
           this.cities = response
-        } else {
+        }
+        else {
           this.cities = []
         }
-        
-        console.log('✅ Города загружены:', this.cities)
-      } catch (error) {
-        console.error('❌ Ошибка загрузки городов:', error)
+      }
+      catch (error) {
+        console.error('Ошибка загрузки городов:', error)
         this.cities = []
-      } finally {
-        this.loading.cities = false
+      }
+      finally {
+        this.loading.cities = false       // выключаем индикатор загрузки
       }
     },
 
@@ -679,21 +315,21 @@ export default {
       this.loading.organizations = true
       try {
         const response = await organizationService.getAll()
-        console.log('📦 organizations response:', response)
-        
         if (response && response.data) {
           this.organizations = response.data
-        } else if (Array.isArray(response)) {
+        }
+        else if (Array.isArray(response)) {
           this.organizations = response
-        } else {
+        }
+        else {
           this.organizations = []
         }
-        
-        console.log('✅ Организации загружены:', this.organizations)
-      } catch (error) {
-        console.error('❌ Ошибка загрузки организаций:', error)
+      }
+      catch (error) {
+        console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
-      } finally {
+      }
+      finally {
         this.loading.organizations = false
       }
     },
@@ -702,25 +338,25 @@ export default {
       this.loading.responsiblePeople = true
       try {
         const response = await responsiblePersonService.getAll()
-        console.log('📦 responsiblePeople response:', response)
-        
         if (response && response.data) {
           this.responsiblePeople = response.data
-        } else if (Array.isArray(response)) {
+        }
+        else if (Array.isArray(response)) {
           this.responsiblePeople = response
-        } else {
+        }
+        else {
           this.responsiblePeople = []
         }
-        
-        console.log('✅ Ответственные лица загружены:', this.responsiblePeople)
-      } catch (error) {
-        console.error('❌ Ошибка загрузки ответственных лиц:', error)
+      }
+      catch (error) {
+        console.error('Ошибка загрузки ответственных лиц:', error)
         this.responsiblePeople = []
-      } finally {
+      }
+      finally {
         this.loading.responsiblePeople = false
       }
     },
-    
+    // валидация полей
     validateField(field) {
       switch(field) {
         case 'organization_from_name':
@@ -765,16 +401,18 @@ export default {
       this.files = newFiles
     },
 
-    onDepartmentChange() {
+    onDepartmentChange(value) {
+      this.selectedDepartment = value
       this.selectedResponsiblePerson = null
       this.position = ''
       this.workPhone = ''
     },
 
-    onResponsiblePersonChange() {
-      if (this.selectedResponsiblePerson) {
+    onResponsiblePersonChange(value) {
+      this.selectedResponsiblePerson = value
+      if (value) {
         const person = this.responsiblePeople.find(
-          p => p.responsible_person_id === this.selectedResponsiblePerson
+          p => p.responsible_person_id === value
         )
         if (person) {
           this.position = person.post || ''
@@ -856,10 +494,6 @@ export default {
       if (this.cities.length >= 2) {
         this.routeData.departure_city_id = this.cities[0].city_id
         this.routeData.arrival_city_id = this.cities[1].city_id
-        console.log('✅ Установлены тестовые ID городов:', {
-          departure: this.cities[0].city_id,
-          arrival: this.cities[1].city_id
-        })
         this.debugValues()
       } else {
         alert('Недостаточно городов в списке')
@@ -886,7 +520,6 @@ export default {
         
         this.attorneyForDriver = true
         
-        console.log('✅ Заполнены тестовые данные')
         this.debugValues()
       } else {
         alert('Недостаточно данных для теста')
@@ -900,16 +533,12 @@ export default {
         const cityData = {
           name: 'Тестовый город ' + new Date().toLocaleTimeString()
         }
-        console.log('📤 Создаем город:', cityData)
-        const cityResponse = await cityService.create(cityData)
-        console.log('✅ Город создан:', cityResponse)
+        await cityService.create(cityData)
 
         const orgData = {
           name: 'Тестовая организация ' + new Date().toLocaleTimeString()
         }
-        console.log('📤 Создаем организацию:', orgData)
-        const orgResponse = await organizationService.create(orgData)
-        console.log('✅ Организация создана:', orgResponse)
+        await organizationService.create(orgData)
 
         const cargoData = {
           cargo_name: 'Тестовый груз ' + new Date().toLocaleTimeString(),
@@ -921,9 +550,7 @@ export default {
           cargo_unit: 'шт',
           delivery_time: new Date().toISOString()
         }
-        console.log('📤 Создаем груз:', cargoData)
-        const cargoResponse = await cargoService.create(cargoData)
-        console.log('✅ Груз создан:', cargoResponse)
+        await cargoService.create(cargoData)
 
         await this.loadCities()
         await this.loadOrganizations()
@@ -934,19 +561,7 @@ export default {
         
       } catch (error) {
         console.error('❌ Ошибка при создании тестовых данных:', error)
-        
-        let errorMessage = 'Ошибка при создании тестовых данных'
-        if (error.response) {
-          console.error('❌ Статус:', error.response.status)
-          console.error('❌ Данные ошибки:', error.response.data)
-          errorMessage = `Ошибка ${error.response.status}: ${JSON.stringify(error.response.data)}`
-        } else if (error.request) {
-          errorMessage = 'Сервер не отвечает. Проверьте подключение.'
-        } else {
-          errorMessage = error.message
-        }
-        
-        alert('❌ ' + errorMessage)
+        alert('❌ Ошибка при создании тестовых данных')
       }
     },
 
@@ -978,8 +593,6 @@ export default {
           attorney_for_driver: true
         }
         
-        console.log('📤 Отправка тестовой заявки:', requestData)
-        
         const response = await requestService.create(requestData)
         console.log('✅ Тестовая заявка создана, ответ:', response)
         
@@ -988,19 +601,7 @@ export default {
         
       } catch (error) {
         console.error('❌ Ошибка при создании тестовой заявки:', error)
-        
-        let errorMessage = 'Ошибка при создании тестовой заявки'
-        if (error.response) {
-          console.error('❌ Статус:', error.response.status)
-          console.error('❌ Данные ошибки:', error.response.data)
-          errorMessage = `Ошибка ${error.response.status}: ${JSON.stringify(error.response.data)}`
-        } else if (error.request) {
-          errorMessage = 'Сервер не отвечает. Проверьте подключение.'
-        } else {
-          errorMessage = error.message
-        }
-        
-        alert('❌ ' + errorMessage)
+        alert('❌ Ошибка при создании тестовой заявки')
       }
     },
 
