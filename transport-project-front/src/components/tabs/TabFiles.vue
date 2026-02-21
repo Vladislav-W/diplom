@@ -11,40 +11,19 @@
           </div>
           
           <v-card flat class="mb-4">
-            <v-file-input
-              v-model="selectedFiles"
-              label="Прикрепить файлы"
-              placeholder="Выберите файлы для загрузки"
-              variant="outlined"
-              dense
-              multiple
-              prepend-icon="mdi-paperclip"
-              class="mb-2"
-              chips
-              show-size
-              counter
-              :loading="uploading"
-              :disabled="uploading"
-              @change="handleFileUpload"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.zip,.rar"
+            <v-file-input v-model="selectedFiles" label="Прикрепите файлы" variant="outlined" dense multiple
+              prepend-icon="mdi-paperclip" class="mb-2" chips show-size counter :loading="uploading"
+              :disabled="uploading" @change="handleFileUpload" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt,.zip,.rar"
             ></v-file-input>
             
             <v-progress-linear
               v-if="uploading"
-              :value="uploadProgress"
-              height="4"
-              color="primary"
-              class="mb-2"
-            ></v-progress-linear>
+              :value="uploadProgress" height="4" color="primary" class="mb-2">
+            </v-progress-linear>
             
             <v-alert
               v-if="uploadError"
-              type="error"
-              dense
-              dismissible
-              class="mb-2"
-              @input="uploadError = ''"
-            >
+              type="error" dense dismissible class="mb-2" @input="uploadError = ''">
               {{ uploadError }}
             </v-alert>
           </v-card>
@@ -59,10 +38,7 @@
             <v-list v-if="files.length > 0" dense class="pa-0">
               <v-list-item
                 v-for="file in files"
-                :key="file.id"
-                class="pa-2 mb-1"
-                style="border: 1px solid #e0e0e0; border-radius: 4px;"
-              >
+                :key="file.id" class="pa-2 mb-1" style="border: 1px solid #e0e0e0; border-radius: 4px;">
                 <v-list-item-icon class="mr-3">
                   <v-icon :color="getFileIconColor(file.type)">
                     {{ getFileIcon(file.type) }}
@@ -79,23 +55,10 @@
                 </v-list-item-content>
 
                 <v-list-item-action class="d-flex flex-row">
-                  <v-btn
-                    icon
-                    small
-                    color="primary"
-                    @click="downloadFile(file)"
-                    class="mr-1"
-                    :disabled="file.loading"
-                  >
+                  <v-btn icon small color="primary" @click="downloadFile(file)" class="mr-1" :disabled="file.loading">
                     <v-icon small>mdi-download</v-icon>
                   </v-btn>
-                  <v-btn
-                    icon
-                    small
-                    color="error"
-                    @click="confirmDeleteFile(file)"
-                    :loading="file.loading"
-                  >
+                  <v-btn icon small color="error" @click="confirmDeleteFile(file)" :loading="file.loading">
                     <v-icon small>mdi-delete</v-icon>
                   </v-btn>
                 </v-list-item-action>
@@ -148,6 +111,7 @@ export default {
       default: () => []
     }
   },
+
   emits: ['update:files'],
   setup(props, { emit }) {
     const selectedFiles = ref([])
@@ -221,11 +185,9 @@ export default {
       if (file.size > MAX_FILE_SIZE) {
         return `Файл "${file.name}" слишком большой (максимум 10 МБ)`
       }
-      
       if (!ALLOWED_TYPES.includes(file.type) && !file.type.startsWith('image/')) {
         return `Недопустимый тип файла "${file.name}"`
       }
-      
       return null
     }
 
@@ -299,8 +261,7 @@ export default {
     }
 
     const downloadFile = async (file) => {
-      file.loading = true
-      
+      file.loading = true   
       try {
         if (file.id.toString().startsWith('temp_') && file.raw) {
           const url = URL.createObjectURL(file.raw)

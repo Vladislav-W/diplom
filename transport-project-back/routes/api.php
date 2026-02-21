@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\AutoParkController;
 use App\Http\Controllers\Api\ResponsiblePersonController;
 use App\Http\Controllers\Api\CargoController;
 use App\Http\Controllers\Api\RequestController;
+use App\Http\Controllers\Api\RequestCargoController;
+use App\Http\Controllers\Api\FileController;
 
 Route::get('/test', function() {
     return response()->json(['message' => 'API работает']);
@@ -21,11 +23,11 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('responsible-people', ResponsiblePersonController::class);
     Route::apiResource('cargo', CargoController::class);
     Route::apiResource('requests', RequestController::class);
+    Route::apiResource('request-cargo', RequestCargoController::class);
+    Route::apiResource('files', FileController::class);
+    
+    // Маршруты для файлов заявки
+    Route::post('/requests/{request}/files', [FileController::class, 'store']);
+    Route::get('/requests/{request}/files', [FileController::class, 'index']);
+    Route::get('/files/{file}/download', [FileController::class, 'download']);
 });
-
-Route::options('/{any}', function () {
-    return response('', 200)
-        ->header('Access-Control-Allow-Origin', 'http://localhost:8080')
-        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-})->where('any', '.*');

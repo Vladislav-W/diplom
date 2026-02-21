@@ -1,5 +1,4 @@
-﻿<?php
-
+<?php 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +26,8 @@ class Request extends Model
         'notes_to',
         'departure_datetime',
         'arrival_datetime',
+        'auto_id',
+        'driver_id',
         'responsible_person_id',
         'attorney_for_driver'
     ];

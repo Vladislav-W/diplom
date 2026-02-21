@@ -174,6 +174,7 @@ import { cityService } from '@/services/cityService'
 import { responsiblePersonService } from '@/services/responsiblePersonService'
 import { requestService } from '@/services/requestService'
 import { cargoService } from '@/services/cargoService'
+import { requestCargoService } from '@/services/requestCargoService'
 import { fileService } from '@/services/fileService'
 
 export default {
@@ -241,7 +242,12 @@ export default {
         departure_city_id: '',
         address_from: '',
         arrival_city_id: '',
-        address_to: ''
+        address_to: '',
+        cargoName: '',
+        packagingType: '',
+        cargoWeight: '',
+        cargoVolume: '',
+        cargoQuantity: ''
       },
       // диалоговое окно для выбора организаций
       organizationsDialog: {
@@ -379,7 +385,6 @@ export default {
           break
       }
     },
-
     validateForm() {
       const requiredFields = [
         'organization_from_name',
@@ -390,7 +395,30 @@ export default {
         'address_to'
       ]
       requiredFields.forEach(field => this.validateField(field))
-      return requiredFields.every(field => !this.errors[field])
+      
+      // Валидация данных о грузе
+      if (this.cargoData && this.cargoData.cargoName) {
+        if (!this.cargoData.cargoName.trim()) {
+          this.errors.cargoName = 'Наименование груза обязательно'
+        }
+        if (!this.cargoData.packagingType) {
+          this.errors.packagingType = 'Вид упаковки обязателен'
+        }
+        if (!this.cargoData.cargoWeight || this.cargoData.cargoWeight === '') {
+          this.errors.cargoWeight = 'Масса груза обязательна'
+        }
+        if (!this.cargoData.cargoVolume || this.cargoData.cargoVolume === '') {
+          this.errors.cargoVolume = 'Объем груза обязателен'
+        }
+        if (!this.cargoData.cargoQuantity || this.cargoData.cargoQuantity === '') {
+          this.errors.cargoQuantity = 'Количество обязательно'
+        }
+      }
+      
+      return requiredFields.every(field => !this.errors[field]) &&
+             (!this.cargoData.cargoName || 
+              (!this.errors.cargoName && !this.errors.packagingType && 
+               !this.errors.cargoWeight && !this.errors.cargoVolume && !this.errors.cargoQuantity))
     },
 
     updateCargoData(data) {
@@ -566,44 +594,87 @@ export default {
     },
 
     async createTestRequest() {
-      console.log('🟢 Начинаем создание тестовой заявки...')
+  console.log('🟢 Начинаем создание тестовой заявки...')
+  
+  try {
+    // Проверяем, есть ли данные в справочниках
+    if (!this.cities.length || !this.organizations.length || !this.responsiblePeople.length) {
+      throw new Error('Сначала создайте тестовые данные в БД (фиолетовая кнопка) или убедитесь, что справочники не пусты')
+    }
+    
+    // Берем первый город для погрузки и второй для разгрузки (если есть)
+    const departureCity = this.cities[0]
+    const arrivalCity = this.cities.length > 1 ? this.cities[1] : this.cities[0]
+    
+    // Берем первую организацию для отправителя и вторую для получателя
+    const fromOrg = this.organizations[0]
+    const toOrg = this.organizations.length > 1 ? this.organizations[1] : this.organizations[0]
+    
+    // Берем первое ответственное лицо
+    const responsiblePerson = this.responsiblePeople[0]
+    
+    // Генерируем уникальный номер заявки
+    const requestNumber = `TEST-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
+    
+    // Формируем данные для отправки
+    const requestData = {
+      request_number: requestNumber,
+      status: 'Черновик',  // Можно также использовать 'На согласовании'
+      organization_from_name: fromOrg.name,
+      departure_city_id: departureCity.city_id,
+      address_from: `Тестовый адрес погрузки, ул. Примерная, д. ${Math.floor(Math.random() * 100)}`,
+      notes_from: `Тестовое примечание для погрузки. Создано: ${new Date().toLocaleString()}`,
+      organization_to_name: toOrg.name,
+      arrival_city_id: arrivalCity.city_id,
+      address_to: `Тестовый адрес разгрузки, ул. Образцовая, д. ${Math.floor(Math.random() * 100)}`,
+      notes_to: `Тестовое примечание для разгрузки. Создано: ${new Date().toLocaleString()}`,
+      departure_datetime: new Date(Date.now() + 24*60*60*1000).toISOString(), // Завтра
+      arrival_datetime: new Date(Date.now() + 48*60*60*1000).toISOString(),   // Послезавтра
+      responsible_person_id: responsiblePerson.responsible_person_id,
+      attorney_for_driver: Math.random() > 0.5 // Случайное значение true/false
+    }
+    
+    console.log('📤 Отправка тестовой заявки:', requestData)
+    
+    // Отправляем запрос
+    const response = await requestService.create(requestData)
+    console.log('✅ Тестовая заявка создана, ответ:', response)
+    
+    // Показываем сообщение об успехе
+    alert(`✅ Тестовая заявка успешно создана!\nНомер: ${requestNumber}`)
+    
+    // Обновляем отладочную информацию
+    this.debugValues()
+    
+    // Опционально: переходим на страницу со списком заявок
+    if (confirm('Заявка создана! Перейти к списку заявок?')) {
+      this.$router.push('/requests')
+    }
+    
+  } catch (error) {
+    console.error('❌ Ошибка при создании тестовой заявки:', error)
+    
+    let errorMessage = 'Ошибка при создании тестовой заявки'
+    if (error.response) {
+      console.error('❌ Статус:', error.response.status)
+      console.error('❌ Данные ошибки:', error.response.data)
       
-      try {
-        const firstCity = this.cities[0]
-        const firstPerson = this.responsiblePeople[0]
-        
-        if (!firstCity || !firstPerson) {
-          throw new Error('Сначала создайте тестовые данные в БД (фиолетовая кнопка)')
-        }
-        
-        const requestData = {
-          request_number: `TEST-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
-          status: 'На согласовании',
-          organization_from_name: this.organizationFromName || 'Тестовая организация',
-          departure_city_id: firstCity.city_id,
-          address_from: this.routeData.address_from || 'Тестовый адрес погрузки',
-          notes_from: this.routeData.notes_from || 'Тестовое примечание погрузки',
-          organization_to_name: this.organizationToName || 'Тестовая организация',
-          arrival_city_id: firstCity.city_id,
-          address_to: this.routeData.address_to || 'Тестовый адрес разгрузки',
-          notes_to: this.routeData.notes_to || 'Тестовое примечание разгрузки',
-          departure_datetime: new Date().toISOString(),
-          arrival_datetime: new Date().toISOString(),
-          responsible_person_id: firstPerson.responsible_person_id,
-          attorney_for_driver: true
-        }
-        
-        const response = await requestService.create(requestData)
-        console.log('✅ Тестовая заявка создана, ответ:', response)
-        
-        alert('✅ Тестовая заявка успешно создана!')
-        this.debugValues()
-        
-      } catch (error) {
-        console.error('❌ Ошибка при создании тестовой заявки:', error)
-        alert('❌ Ошибка при создании тестовой заявки')
+      // Форматируем ошибку для понятного отображения
+      if (error.response.data.errors) {
+        const errors = Object.values(error.response.data.errors).flat()
+        errorMessage = errors.join('\n')
+      } else if (error.response.data.message) {
+        errorMessage = error.response.data.message
       }
-    },
+    } else if (error.request) {
+      errorMessage = 'Сервер не отвечает. Проверьте подключение.'
+    } else {
+      errorMessage = error.message
+    }
+    
+    alert('❌ ' + errorMessage)
+  }
+},
 
     async saveRequest() {
       if (!this.validateForm()) {
@@ -653,6 +724,44 @@ export default {
         
         if (!requestId) {
           throw new Error('Не удалось получить ID созданной заявки')
+        }
+        
+        // Сохраняем груз, если заполнены данные о грузе
+        let cargoId = null
+        if (this.cargoData && this.cargoData.cargoName) {
+          console.log('📦 Создаем груз...')
+          const cargoPayload = {
+            cargo_name: this.cargoData.cargoName,
+            date_of_taking_cargo: this.cargoData.receiptDate ? this.cargoData.receiptDate : new Date().toISOString().split('T')[0],
+            type_of_packaging: this.cargoData.packagingType || 'Без упаковки',
+            weight_of_cargo: parseFloat(this.cargoData.cargoWeight) || 0,
+            cargo_volume: parseFloat(this.cargoData.cargoVolume) || 0,
+            quantity: parseInt(this.cargoData.cargoQuantity) || 1,
+            cargo_unit: 'шт',
+            delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
+            additional_info: this.cargoData.additionalInfo || '',
+            hazard_class: this.cargoData.hazardClass || null
+          }
+          console.log('📦 Данные груза:', cargoPayload)
+          
+          const cargoResponse = await cargoService.create(cargoPayload)
+          console.log('✅ Груз создан, ответ:', cargoResponse)
+          
+          if (cargoResponse.data && cargoResponse.data.cargo_id) {
+            cargoId = cargoResponse.data.cargo_id
+          } else if (cargoResponse.cargo_id) {
+            cargoId = cargoResponse.cargo_id
+          }
+          
+          // Связываем груз с заявкой
+          if (cargoId) {
+            console.log('🔗 Связываем груз с заявкой...')
+            await requestCargoService.create({
+              request_id: requestId,
+              cargo_id: cargoId
+            })
+            console.log('✅ Груз связан с заявкой')
+          }
         }
         
         if (this.files && this.files.length > 0) {
@@ -721,6 +830,44 @@ export default {
           throw new Error('Не удалось получить ID созданной заявки')
         }
         
+        // Сохраняем груз, если заполнены данные о грузе
+        let cargoId = null
+        if (this.cargoData && this.cargoData.cargoName) {
+          console.log('📦 Создаем груз...')
+          const cargoPayload = {
+            cargo_name: this.cargoData.cargoName,
+            date_of_taking_cargo: this.cargoData.receiptDate ? this.cargoData.receiptDate : new Date().toISOString().split('T')[0],
+            type_of_packaging: this.cargoData.packagingType || 'Без упаковки',
+            weight_of_cargo: parseFloat(this.cargoData.cargoWeight) || 0,
+            cargo_volume: parseFloat(this.cargoData.cargoVolume) || 0,
+            quantity: parseInt(this.cargoData.cargoQuantity) || 1,
+            cargo_unit: 'шт',
+            delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
+            additional_info: this.cargoData.additionalInfo || '',
+            hazard_class: this.cargoData.hazardClass || null
+          }
+          console.log('📦 Данные груза:', cargoPayload)
+          
+          const cargoResponse = await cargoService.create(cargoPayload)
+          console.log('✅ Груз создан, ответ:', cargoResponse)
+          
+          if (cargoResponse.data && cargoResponse.data.cargo_id) {
+            cargoId = cargoResponse.data.cargo_id
+          } else if (cargoResponse.cargo_id) {
+            cargoId = cargoResponse.cargo_id
+          }
+          
+          // Связываем груз с заявкой
+          if (cargoId) {
+            console.log('🔗 Связываем груз с заявкой...')
+            await requestCargoService.create({
+              request_id: requestId,
+              cargo_id: cargoId
+            })
+            console.log('✅ Груз связан с заявкой')
+          }
+        }
+        
         if (this.files && this.files.length > 0) {
           await this.uploadFiles(requestId)
         }
@@ -736,6 +883,7 @@ export default {
       }
     }
   },
+  
   mounted() {
     this.loadCities()
     this.loadOrganizations()
