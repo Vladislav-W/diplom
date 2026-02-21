@@ -1,13 +1,27 @@
 import api from './api';
 
+// Функция для парсинга JSON-строки с удалением BOM
+const parseJsonIfNeeded = (data) => {
+  if (typeof data === 'string') {
+    try {
+      return JSON.parse(data.replace(/^\uFEFF/, ''));
+    } catch (e) {
+      console.error('Ошибка парсинга JSON:', e);
+      return data;
+    }
+  }
+  return data;
+};
+
 export const fileService = {
   async upload(requestId, file) {
     try {
       const formData = new FormData();
+      formData.append('request_id', requestId);
       formData.append('file', file);
-      
+
       const response = await api.post(`/requests/${requestId}/files`, formData, {
-        headers: { 
+        headers: {
           'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: (progressEvent) => {
@@ -15,6 +29,8 @@ export const fileService = {
           console.log(`Прогресс загрузки ${file.name}: ${percentCompleted}%`);
         }
       });
+      
+      response.data = parseJsonIfNeeded(response.data);
       return response.data;
     } catch (error) {
       console.error(`Ошибка при загрузке файла ${file.name}:`, error);
@@ -25,6 +41,7 @@ export const fileService = {
   async getFiles(requestId) {
     try {
       const response = await api.get(`/requests/${requestId}/files`);
+      response.data = parseJsonIfNeeded(response.data);
       return response.data;
     } catch (error) {
       console.error(`Ошибка при получении файлов заявки ${requestId}:`, error);
@@ -47,6 +64,7 @@ export const fileService = {
   async delete(fileId) {
     try {
       const response = await api.delete(`/files/${fileId}`);
+      response.data = parseJsonIfNeeded(response.data);
       return response.data;
     } catch (error) {
       console.error(`Ошибка при удалении файла ${fileId}:`, error);

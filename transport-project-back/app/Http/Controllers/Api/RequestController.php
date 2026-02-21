@@ -85,10 +85,11 @@ class RequestController extends Controller
                 'responsible_person_id' => $request->input('responsible_person_id'),
                 'attorney_for_driver' => $request->input('attorney_for_driver', false),
             ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Заявка успешно создана',
+                'request_id' => $newRequest->request_id,
                 'data' => $newRequest
             ], 201);
             

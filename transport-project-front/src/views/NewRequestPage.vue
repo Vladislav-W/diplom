@@ -714,16 +714,21 @@ export default {
         console.log('📤 Отправка заявки:', requestData)
         const requestResponse = await requestService.create(requestData)
         console.log('✅ Заявка создана, ответ:', requestResponse)
-        
+
+        // Получаем ID созданной заявки
+        // requestService.create уже вернул распарсенный объект
         let requestId = null
-        if (requestResponse.data && requestResponse.data.request_id) {
-          requestId = requestResponse.data.request_id
-        } else if (requestResponse.request_id) {
-          requestId = requestResponse.request_id
-        }
         
+        if (requestResponse && requestResponse.request_id) {
+          requestId = requestResponse.request_id
+        } else if (requestResponse && requestResponse.data && requestResponse.data.request_id) {
+          requestId = requestResponse.data.request_id
+        }
+
+        console.log('📋 ID заявки:', requestId)
+
         if (!requestId) {
-          throw new Error('Не удалось получить ID созданной заявки')
+          throw new Error('Не удалось получить ID созданной заявки. Ответ сервера: ' + JSON.stringify(requestResponse))
         }
         
         // Сохраняем груз, если заполнены данные о грузе
@@ -739,8 +744,8 @@ export default {
             quantity: parseInt(this.cargoData.cargoQuantity) || 1,
             cargo_unit: 'шт',
             delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
-            additional_info: this.cargoData.additionalInfo || '',
-            hazard_class: this.cargoData.hazardClass || null
+            notes: this.cargoData.additionalInfo || '',
+            danger_class: this.cargoData.hazardClass || null
           }
           console.log('📦 Данные груза:', cargoPayload)
           
@@ -818,16 +823,21 @@ export default {
         console.log('📤 Отправка на согласование:', requestData)
         const requestResponse = await requestService.create(requestData)
         console.log('✅ Заявка отправлена на согласование, ответ:', requestResponse)
-        
+
+        // Получаем ID созданной заявки
+        // requestService.create уже вернул распарсенный объект
         let requestId = null
-        if (requestResponse.data && requestResponse.data.request_id) {
-          requestId = requestResponse.data.request_id
-        } else if (requestResponse.request_id) {
-          requestId = requestResponse.request_id
-        }
         
+        if (requestResponse && requestResponse.request_id) {
+          requestId = requestResponse.request_id
+        } else if (requestResponse && requestResponse.data && requestResponse.data.request_id) {
+          requestId = requestResponse.data.request_id
+        }
+
+        console.log('📋 ID заявки:', requestId)
+
         if (!requestId) {
-          throw new Error('Не удалось получить ID созданной заявки')
+          throw new Error('Не удалось получить ID созданной заявки. Ответ сервера: ' + JSON.stringify(requestResponse))
         }
         
         // Сохраняем груз, если заполнены данные о грузе
@@ -843,8 +853,8 @@ export default {
             quantity: parseInt(this.cargoData.cargoQuantity) || 1,
             cargo_unit: 'шт',
             delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
-            additional_info: this.cargoData.additionalInfo || '',
-            hazard_class: this.cargoData.hazardClass || null
+            notes: this.cargoData.additionalInfo || '',
+            danger_class: this.cargoData.hazardClass || null
           }
           console.log('📦 Данные груза:', cargoPayload)
           
