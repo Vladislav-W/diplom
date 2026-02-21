@@ -745,7 +745,8 @@ export default {
             cargo_unit: 'шт',
             delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
             notes: this.cargoData.additionalInfo || '',
-            danger_class: this.cargoData.hazardClass || null
+            danger_class: this.cargoData.hazardClass || null,
+            material_items: this.cargoData.materialItems || []
           }
           console.log('📦 Данные груза:', cargoPayload)
           
@@ -854,7 +855,8 @@ export default {
             cargo_unit: 'шт',
             delivery_time: this.cargoData.deliveryDate ? this.cargoData.deliveryDate : new Date().toISOString(),
             notes: this.cargoData.additionalInfo || '',
-            danger_class: this.cargoData.hazardClass || null
+            danger_class: this.cargoData.hazardClass || null,
+            material_items: this.cargoData.materialItems || []
           }
           console.log('📦 Данные груза:', cargoPayload)
           

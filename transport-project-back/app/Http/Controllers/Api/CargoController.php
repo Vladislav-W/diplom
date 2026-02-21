@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cargo;
+use App\Models\MaterialItem;
 use Illuminate\Http\Request;
 
 class CargoController extends Controller
@@ -14,7 +15,7 @@ class CargoController extends Controller
     public function index()
     {
         try {
-            $cargo = Cargo::all();
+            $cargo = Cargo::with('materialItems')->get();
             return response()->json([
                 'success' => true,
                 'data' => $cargo
@@ -58,6 +59,20 @@ class CargoController extends Controller
                 'delivery_time' => $request->input('delivery_time'),
                 'notes' => $request->input('notes'),
             ]);
+
+            // Сохраняем материальные ценности, если они переданы
+            $materialItems = $request->input('material_items');
+            if ($materialItems && is_array($materialItems)) {
+                foreach ($materialItems as $item) {
+                    MaterialItem::create([
+                        'cargo_id' => $cargo->cargo_id,
+                        'name' => $item['name'],
+                        'quantity' => (int) $item['quantity'],
+                        'unit' => $item['unit'],
+                    ]);
+                }
+                \Log::info('Material items created:', ['count' => count($materialItems)]);
+            }
 
             \Log::info('Cargo created:', ['cargo_id' => $cargo->cargo_id]);
 

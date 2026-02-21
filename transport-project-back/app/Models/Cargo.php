@@ -24,13 +24,20 @@ class Cargo extends Model
         'cargo_unit',
         'danger_class',
         'delivery_time',
-        'notes'
+        'notes',
+        'material_items'
     ];
 
     protected $casts = [
         'date_of_taking_cargo' => 'date',
         'delivery_time' => 'datetime',
         'weight_of_cargo' => 'decimal:2',
-        'cargo_volume' => 'decimal:2'
+        'cargo_volume' => 'decimal:2',
+        'material_items' => 'array'
     ];
+
+    public function materialItems()
+    {
+        return $this->hasMany(MaterialItem::class, 'cargo_id', 'cargo_id');
+    }
 }
