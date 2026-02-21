@@ -33,6 +33,8 @@ class RequestCargoController extends Controller
     public function store(Request $request)
     {
         try {
+            \Log::info('RequestCargo create request:', $request->all());
+
             $validated = $request->validate([
                 'request_id' => 'required|integer',
                 'cargo_id' => 'required|integer',
@@ -45,13 +47,20 @@ class RequestCargoController extends Controller
                 'unit' => $request->input('unit', 'шт'),
             ]);
 
+            \Log::info('RequestCargo created:', [
+                'request_cargo_id' => $requestCargo->request_cargo_id,
+                'request_id' => $requestCargo->request_id,
+                'cargo_id' => $requestCargo->cargo_id,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Груз успешно привязан к заявке',
                 'data' => $requestCargo
             ], 201);
-            
+
         } catch (\Exception $e) {
+            \Log::error('RequestCargo create error:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

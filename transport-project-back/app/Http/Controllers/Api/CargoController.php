@@ -33,6 +33,8 @@ class CargoController extends Controller
     public function store(Request $request)
     {
         try {
+            \Log::info('Cargo create request:', $request->all());
+
             $validated = $request->validate([
                 'cargo_name' => 'required|string|max:200',
                 'date_of_taking_cargo' => 'required|date',
@@ -57,13 +59,16 @@ class CargoController extends Controller
                 'notes' => $request->input('notes'),
             ]);
 
+            \Log::info('Cargo created:', ['cargo_id' => $cargo->cargo_id]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Груз успешно создан',
                 'data' => $cargo
             ], 201);
-            
+
         } catch (\Exception $e) {
+            \Log::error('Cargo create error:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

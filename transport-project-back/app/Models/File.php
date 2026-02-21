@@ -23,8 +23,24 @@ class File extends Model
     ];
 
     protected $casts = [
-        'file_data' => 'binary'
+        'file_data' => 'string'
     ];
+
+    /**
+     * Устанавливаем бинарные данные для PostgreSQL
+     */
+    public function setFileDataAttribute($value)
+    {
+        $this->attributes['file_data'] = $value;
+    }
+
+    /**
+     * Получаем бинарные данные
+     */
+    public function getFileDataAttribute($value)
+    {
+        return $value;
+    }
 
     public function request()
     {

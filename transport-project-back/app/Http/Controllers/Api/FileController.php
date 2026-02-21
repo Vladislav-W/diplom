@@ -34,16 +34,28 @@ class FileController extends Controller
     public function store(Request $request)
     {
         try {
+            \Log::info('File upload request:', [
+                'request_id' => $request->input('request_id'),
+                'has_file' => $request->hasFile('file'),
+            ]);
+
             $request->validate([
                 'request_id' => 'required|integer',
                 'file' => 'required|file|max:10240', // максимум 10MB
             ]);
 
             $uploadedFile = $request->file('file');
-            
+
             // Читаем содержимое файла
             $fileData = file_get_contents($uploadedFile->getRealPath());
-            
+
+            \Log::info('File data:', [
+                'file_name' => $uploadedFile->getClientOriginalName(),
+                'file_type' => $uploadedFile->getMimeType(),
+                'file_size' => $uploadedFile->getSize(),
+                'data_length' => strlen($fileData),
+            ]);
+
             $file = FileModel::create([
                 'request_id' => $request->input('request_id'),
                 'file_name' => $uploadedFile->getClientOriginalName(),
@@ -51,6 +63,8 @@ class FileController extends Controller
                 'file_data' => $fileData,
                 'file_size' => $uploadedFile->getSize(),
             ]);
+
+            \Log::info('File created:', ['file_id' => $file->file_id]);
 
             return response()->json([
                 'success' => true,
@@ -62,8 +76,9 @@ class FileController extends Controller
                     'file_size' => $file->file_size
                 ]
             ], 201);
-            
+
         } catch (\Exception $e) {
+            \Log::error('File upload error:', ['message' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
